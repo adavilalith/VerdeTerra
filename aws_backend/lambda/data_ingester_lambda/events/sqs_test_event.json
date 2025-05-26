@@ -1,0 +1,20 @@
+{
+  "Records": [
+    {
+      "messageId": "msg1-test-id-1234-abcd-efgh-567890abcdef",
+      "receiptHandle": "AQEBwA2Mh4gGqWn+m9qG+ZzK0QeI5Y/D...",
+      "body": "{\"device_id\":\"verde-terra-esp32-001\",\"timestamp_ms\":1716719954000,\"air_temp_c\":24.8,\"air_humidity_pct\":58.1,\"soil_moisture_pct\":42,\"soil_temp_c\":21.5}",
+      "attributes": {
+        "ApproximateReceiveCount": "1",
+        "SentTimestamp": "1716719954000",
+        "SenderId": "AROAXXXXXXXXXXXXXXX:my-lambda-role",
+        "ApproximateFirstReceiveTimestamp": "1716719954000"
+      },
+      "messageAttributes": {},
+      "md5OfBody": "a1b2c3d4e5f67890abcdef1234567890",
+      "eventSource": "aws:sqs",
+      "eventSourceARN": "arn:aws:sqs:YOUR_AWS_REGION:YOUR_AWS_ACCOUNT_ID:verde-terra-sensor-data-queue-dev",
+      "awsRegion": "YOUR_AWS_REGION"
+    }
+  ]
+}
