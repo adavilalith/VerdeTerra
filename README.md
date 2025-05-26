@@ -1,7 +1,3 @@
-
-
-
-
 <h1>🌱 VerdeTerra Sense: Real-time Environmental Monitor 🌡️💧</h1>
 
 <p>Monitor your garden's vital signs with this comprehensive IoT solution powered by the cloud!</p>
@@ -38,8 +34,8 @@ This diagram illustrates how sensor data is published from ESP32 devices and sto
                                                                                   
 +-----------------+    MQTT        +------------------+    IoT Rule    +-------------------+
 |  IoT Things     |--------------> |   AWS IoT Core   |--------------->|    SQS Queue      |
-|  (ESP32)        |  (Publish)     |  (Topic:         | (Route to SQS) |                   |
-+-----------------+                |   esp32/pub)     |                +---------+---------+
+|  (esp32)        |  (Publish)     |  (MQTT Topic)    | (Route to SQS) |                   |
++-----------------+                |                  |                +---------+---------+
                                    +------------------+                          |
                                                                                  | Trigger
                                                                                  v
@@ -52,13 +48,13 @@ This diagram illustrates how sensor data is published from ESP32 devices and sto
                                                                                  v
                                                                        +-------------------+
                                                                        |   DynamoDB Table  |
-                                                                       | (esp32_metrics)   |
                                                                        +-------------------+
+
 ```
 
 **Explanation:**
 * **IoT Things (ESP32):** Your ESP32 devices publish sensor data using MQTT.
-* **AWS IoT Core:** Receives the MQTT messages on the `esp32/pub` topic.
+* **AWS IoT Core:** Receives the MQTT messages on the `esp32/data/verde-terra/{device_id}` topic.
 * **IoT Rule:** A message routing rule processes incoming messages, forwarding them to an SQS queue.
 * **SQS Queue:** Temporarily stores the incoming sensor data messages.
 * **Lambda Function (Ingestion):** Triggered by new messages in the SQS queue, this function processes the data.
@@ -86,7 +82,7 @@ This diagram details how users access the web dashboard and retrieve sensor data
 |   (Web App Host)  |                                                             
 +---------+---------+                                                             
           |                                                                       
-          | HTTPS / AJAX GET (Sensor Data Request with Time Range)                
+          | Fetch GET (Sensor Data Request with TimeBackMs)                
           | (Initiated by JavaScript in browser)                                  
           v                                                                       
 +-------------------+                                                             
@@ -104,8 +100,7 @@ This diagram details how users access the web dashboard and retrieve sensor data
           | Query Data (Time Range)                                               
           v                                                                       
 +-------------------+                                                             
-|   DynamoDB Table  |                                                             
-| (esp32_metrics)   |                                                             
+|   DynamoDB Table  |                                                                                                                        
 +-------------------+                                                             
 ```
 
@@ -117,7 +112,7 @@ This diagram details how users access the web dashboard and retrieve sensor data
     * Once the web application loads in the browser, subsequent requests for dynamic data (like fetching sensor metrics) are made directly to this API Gateway.
     * It exposes a `/data` GET HTTP endpoint.
 * **Lambda Function (Fetch Data):** Triggered by the API Gateway endpoint, this function retrieves data.
-* **DynamoDB Table (esp32_metrics):** The Fetch Data Lambda queries this table to retrieve sensor data based on the specified time range.
+* **DynamoDB Table:** The Fetch Data Lambda queries this table to retrieve sensor data based on the specified time range.
 
 
 ## 🚀 <ins>**Getting Started**</ins> 🚀
@@ -147,14 +142,14 @@ Follow these steps to get your own VerdeTerra Sense system running:
 
       * **AWS IoT Core:** Register your ESP32 as a Thing, create a security Policy, and attach it to the Thing.
       * **SQS:** Create a Standard SQS Queue in your AWS console.
-      * **DynamoDB:** Create a table named `esp32_metrics` with:
+      * **DynamoDB:** Create a table named `verde-terra-sensor-data` with:
           * **Partition Key:** `device_id` (String)
           * **Sort Key:** `timestamp_ms` (Number)
-      * **AWS Lambda (`esp32-data-api-handler`):** Deploy the Python Lambda function (see backend/lambda/api directory). Ensure it has an IAM role with permissions to `dynamodb:Query` on your `esp32-sensor-data` table.
+      * **AWS Lambda (`verde-terra-api-handler`):** Deploy the Python Lambda function (see backend/lambda/api directory). Ensure it has an IAM role with permissions to `dynamodb:Query` on your `verde-terra-api-handler` table.
       * **API Gateway:**
           * Create a new REST API.
           * Define a `/data` resource.
-          * Create a `GET` method on `/data` and configure it with **Lambda Proxy Integration** pointing to your `esp32-data-api-handler` Lambda function.
+          * Create a `GET` method on `/data` and configure it with **Lambda Proxy Integration** pointing to your `verde-terra-api-handler` Lambda function.
           * **Enable CORS** on the `/data` resource (using the "Enable CORS" action in the API Gateway console).
       * *(Note: For a more automated setup, consider using Infrastructure as Code tools like AWS SAM or AWS CDK. You could also integrate Amplify CLI for backend management in a future iteration.)*
 
@@ -162,28 +157,32 @@ Follow these steps to get your own VerdeTerra Sense system running:
 
       * Develop your ESP32 firmware (see firmware/esp32 directory for examples or a starting point).
       * Ensure it reads data from your soil moisture and DHT sensors.
-      * Configure the firmware to securely publish sensor readings in JSON format to a designated AWS IoT MQTT topic (e.g., `esp32/pub`).
-      * In the AWS IoT Core console, create an **IoT Rule** that listens to the topic your ESP32 publishes to (`SELECT * FROM 'esp32/pub'`) and adds an action to send the message payload to your created SQS queue.
+      * Configure the firmware to securely publish sensor readings in JSON format to a designated AWS IoT MQTT topic (e.g., `esp32/data/verde-terra/{device_id}`).
+      * In the AWS IoT Core console, create an **IoT Rule** that listens to the topic your ESP32 publishes to (`SELECT * FROM 'esp32/data/verde-terra/{device_id}'`) and adds an action to send the message payload to your created SQS queue.
 
-4.  **<font color="#007bff">Web Dashboard (Frontend) Deployment with Amplify Hosting</font>:**
+4.  **<font color="#007bff">Web Dashboard (Frontend) Deployment with Amplify Hosting:</font>:**
 
-      * Navigate to the `frontend` directory: `cd frontend`
-      * Open `script.js` and **replace the placeholder `API_GATEWAY_URL`** with the **Invoke URL** of your deployed API Gateway `prod/data` endpoint.
-      * Commit your changes and push your `frontend` code to your **main** branch (or your preferred deployment branch) on GitHub.
-      * Go to the [**AWS Amplify Console**](https://console.aws.amazon.com/amplify/home), select **"Amplify Hosting,"** and click **"New app"** -> **"Host your web app."**
-      * Choose **GitHub**, connect to your repository, and select the branch you want to deploy.
-      * Amplify will automatically detect the frontend application. Review the build settings and click **"Save and deploy."** Your dashboard will be live at the provided Amplify URL.
-
+    * Navigate to the `verdeterra-dashboard/` directory.
+    * **Configure Environment Variables in Amplify:**
+        * **Do NOT** create a `.env` file in your repository for sensitive API endpoints. Instead, Amplify securely injects these during the build process.
+        * Go to the [**AWS Amplify Console**](https://console.aws.amazon.com/amplify/home) for your application.
+        * Navigate to **App settings** > **Environment variables**.
+        * Add a new variable (e.g., `VITE_APP_API_GATEWAY_URL`) and set its value to the **Invoke URL** of your deployed `VerdeTerraSenseApi` `prod/data` endpoint.
+        * *Vite expects environment variables to be prefixed with `VITE_` to be exposed to the client-side code.* Your code should access it like `process.env.VITE_APP_API_GATEWAY_URL`.
+    * Commit your changes and push your `verdeterra-dashboard` code to your **main** branch (or your preferred deployment branch) on GitHub.
+    * Go to the [**AWS Amplify Console**](https://console.aws.amazon.com/amplify/home), select **"Amplify Hosting,"** and click **"New app"** -> **"Host your web app."**
+    * Choose **GitHub**, connect to your repository, and select the branch you want to deploy.
+    * Amplify will automatically detect your frontend application (being a Vite app).
+        * **Build Settings:** Amplify should auto-configure the build settings. If you need to manually confirm, ensure they are set to:
+            * **Base directory:** `verdeterra-dashboard` (or the relative path from your repo root to your Vite project)
+            * **Build command:** `npm run build` (or `yarn build`)
+            * **Output directory:** `dist`
+        * *You generally don't need to explicitly provide a `amplify.yml` file in your repository for a standard Vite app, as Amplify detects common frameworks.*
+    * Click **"Save and deploy."** Your dashboard will be live at the provided Amplify URL.
+      
 5.  **Start Monitoring!** Access your deployed Amplify Hosting URL in your web browser to view your real-time environmental data.
 
 ## 🤝 <ins>**Contributing**</ins> 🤝
 
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
 
 **Enjoy monitoring your green space with VerdeTerra Sense!** 🌱
