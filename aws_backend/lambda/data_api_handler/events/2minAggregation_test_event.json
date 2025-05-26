@@ -1,0 +1,15 @@
+{
+  "httpMethod": "GET",
+  "queryStringParameters": {
+    "deviceId": "verde-terra-esp32-001",
+    "timeBackMs": "10800000"
+  },
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "requestContext": {
+    "resourcePath": "/data"
+  },
+  "path": "/data",
+  "resource": "/data"
+}
