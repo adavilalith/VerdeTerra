@@ -1,0 +1,33 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Connect"
+      ],
+      "Resource": "arn:aws:iot:YOUR_AWS_REGION:YOUR_AWS_ACCOUNT_ID:client/YOUR_THING_NAME"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Publish"
+      ],
+      "Resource": "arn:aws:iot:YOUR_AWS_REGION:YOUR_AWS_ACCOUNT_ID:topic/esp32/data/verde-terra/YOUR_THING_NAME"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Subscribe"
+      ],
+      "Resource": "arn:aws:iot:YOUR_AWS_REGION:YOUR_AWS_ACCOUNT_ID:topicfilter/esp32/commands/verde-terra/YOUR_THING_NAME"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Receive"
+      ],
+      "Resource": "arn:aws:iot:YOUR_AWS_REGION:YOUR_AWS_ACCOUNT_ID:topic/esp32/commands/verde-terra/YOUR_THING_NAME"
+    }
+  ]
+}

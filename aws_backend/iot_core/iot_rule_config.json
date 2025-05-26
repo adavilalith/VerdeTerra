@@ -1,0 +1,15 @@
+{
+  "ruleName": "verde_terra_sensor_ingestion_rule",
+  "description": "Routes VerdeTerra ESP32 sensor data to SQS queue for ingestion.",
+  "sql": "SELECT device_id, timestamp_ms, air_temp_c, air_humidity_pct, soil_moisture_pct, soil_temp_c FROM 'esp32/data/verde-terra/#'",
+  "actions": [
+    {
+      "sqs": {
+        "queueUrl": "https://sqs.YOUR_AWS_REGION.amazonaws.com/YOUR_AWS_ACCOUNT_ID/verde-terra-sensor-data-queue-dev",
+        "roleArn": "arn:aws:iam::YOUR_AWS_ACCOUNT_ID:role/VerdeTerraIoTRuleRole-dev",
+        "messageFormat": "RAW"
+      }
+    }
+  ],
+  "enabled": true
+}
