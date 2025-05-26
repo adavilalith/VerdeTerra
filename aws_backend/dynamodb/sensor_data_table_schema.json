@@ -1,0 +1,23 @@
+{
+  "tableName": "verde-terra-sensor-data-dev",
+  "primaryKey": {
+    "partitionKey": {
+      "name": "device_id",
+      "type": "String"
+    },
+    "sortKey": {
+      "name": "timestamp_ms",
+      "type": "Number"
+    }
+  },
+  "attributes": [
+    {"name": "device_id", "type": "String"},
+    {"name": "timestamp_ms", "type": "Number"},
+    {"name": "air_temp_c", "type": "Number"},
+    {"name": "air_humidity_pct", "type": "Number"},
+    {"name": "soil_moisture_pct", "type": "Number"},
+    {"name": "soil_temp_c", "type": "Number"}
+  ],
+  "capacityMode": "ON_DEMAND",
+  "notes": "DynamoDB uses 'Number' type for all numerical values. Python's Lambda function must convert floats to Decimal objects before writing."
+}
