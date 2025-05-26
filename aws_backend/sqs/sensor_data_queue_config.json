@@ -1,0 +1,10 @@
+{
+  "queueName": "verde-terra-sensor-data-queue-dev",
+  "queueUrl": "https://sqs.YOUR_AWS_REGION.amazonaws.com/YOUR_AWS_ACCOUNT_ID/verde-terra-sensor-data-queue-dev",
+  "queueArn": "arn:aws:sqs:YOUR_AWS_REGION:YOUR_AWS_ACCOUNT_ID:verde-terra-sensor-data-queue-dev",
+  "visibilityTimeout": 30,         
+  "messageRetentionPeriod": 345600, 
+  "receiveMessageWaitTime": 0,    
+  "deliveryDelay": 0,              
+  "notes": "This SQS queue acts as the buffer between AWS IoT Core and the Lambda ingester. The Lambda function is configured as a trigger for this queue."
+}
