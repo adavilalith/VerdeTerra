@@ -5,18 +5,19 @@
 #include "sensor_handler.h"
 
 #ifndef LED_BUILTIN
-#define LED_BUILTIN 2
+#define LED_BUILTIN 4
 #endif
 
 void setup() {
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
+  
+  connectAWS();
+  setupSensors();  
   digitalWrite(LED_BUILTIN, HIGH);
   delay(2000);
   digitalWrite(LED_BUILTIN, LOW);
 
-  connectAWS();
-  setupSensors(); 
 }
 
 void loop() {
@@ -30,10 +31,10 @@ void loop() {
     float soilTemp = readSoilTemperature();
 
     unsigned long long currentTimestampMs = (unsigned long long)timeClient.getEpochTime() * 1000ULL;
-    printf("%f\n%f\n%f\n%f\n\n",airTemp,airHum,soilMoisture,soilTemp);
-    publishMessage(THINGNAME, currentTimestampMs, airTemp, airHum, soilMoisture, soilTemp);
+    // printf("%f\n%f\n%f\n%f\n\n",airTemp,airHum,soilMoisture,soilTemp);
+    // publishMessage(THINGNAME, currentTimestampMs, airTemp, airHum, soilMoisture, soilTemp);
   } else {
-    Serial.println("Not connected. Skipping publish.");
+    // Serial.println("Not connected. Skipping publish.");
   }
 
   delay(3000);
