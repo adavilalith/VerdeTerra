@@ -2,10 +2,9 @@
 
 <p>Monitor your garden's vital signs with this comprehensive IoT solution powered by the cloud!</p>
 
-
-<ins>**Short Description**</ins>
-
 Full-stack IoT solution monitoring soil/air moisture & temp. Uses ESP32, AWS IoT Core, SQS, DynamoDB, Lambda/API Gateway, and an <font color="#232F3E">**AWS Amplify**</font>-hosted web dashboard.
+
+**View Website Demo Here**: [VerdeTerra Website Demo](https://main.d2w8447dose1m.amplifyapp.com/model)
 
 ## ✨**Key Features** ✨
 
